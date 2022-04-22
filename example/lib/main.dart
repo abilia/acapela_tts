@@ -135,7 +135,6 @@ class _MyAppState extends State<MyApp> {
       _voices?.clear();
       if (voices != null) {
         _voices = (voices.map((e) => e.toString())).toList();
-        print("voices " + (_voices != null ? _voices!.length.toString() : ''));
       }
     });
   }

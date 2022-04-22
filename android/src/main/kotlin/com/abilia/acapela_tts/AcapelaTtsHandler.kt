@@ -10,7 +10,6 @@ class AcapelaTtsHandler(
     context: Context?,
     license: AcapelaLicense,
     voicePath: String,
-    listener: OnTtsFinishedListener
 ) : acattsandroid.iTTSEventsCallback {
     companion object {
         private val TAG = AcapelaTtsHandler::class.java.simpleName
@@ -32,7 +31,7 @@ class AcapelaTtsHandler(
         fun onTextSpeakFinished()
     }
 
-    private val mListener: OnTtsFinishedListener = listener
+    private var mListener: OnTtsFinishedListener? = null
     var voice: String? = null
         private set
     private lateinit var mTts: acattsandroid
@@ -86,7 +85,7 @@ class AcapelaTtsHandler(
     }
 
     fun setVoice(call: MethodCall, result: MethodChannel.Result) {
-        val voice: String? = call.argument("voice")
+        val voice: String = call.argument("voice")
         val loadedVoice = setVoice(voice)
         result.success(loadedVoice != null)
     }
@@ -107,7 +106,7 @@ class AcapelaTtsHandler(
             while (!loaded && voiceToTry < availableVoices.size) {
                 loaded = loadVoice(availableVoices[voiceToTry++])
             }
-            if(!loaded){
+            if (!loaded) {
                 Log.d(TAG, "Failed to load any suitable voice")
             }
         }
@@ -115,10 +114,14 @@ class AcapelaTtsHandler(
     }
 
     fun textToSpeech(call: MethodCall, result: MethodChannel.Result) {
-        val text: String? = call.argument("text")
+        val text: String = call.argument("text")
         if (text != null && isVoiceLoaded) {
             mTts.speak(text)
-            result.success(true)
+            mListener = object : OnTtsFinishedListener {
+                override fun onTextSpeakFinished() {
+                    result.success(true)
+                }
+            }
         } else if (text == null) {
             result.error("ARGUMENT", "No argument 'text' of type String provided", null)
         } else {
@@ -127,7 +130,7 @@ class AcapelaTtsHandler(
     }
 
     fun setSpeechRate(call: MethodCall, result: MethodChannel.Result) {
-        val speed: Double? = call.argument("speed")
+        val speed: Double = call.argument("speed")
         if (speed != null && isVoiceLoaded) {
             setSpeechRate(speed.toFloat())
         } else if (speed == null) {
@@ -139,7 +142,7 @@ class AcapelaTtsHandler(
 
     override fun ttsevents(type: Long, param1: Long, param2: Long, param3: Long, param4: Long) {
         if (type == acattsandroid.EVENT_AUDIO_END.toLong()) {
-            mListener.onTextSpeakFinished()
+            mListener?.onTextSpeakFinished()
         }
     }
 

@@ -55,15 +55,12 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
             context,
             mLicense!!,
             context!!.filesDir.absolutePath + VOICES_PATH,
-            listener
         )
         mAcapelaTts.setVoice(mAcapelaTts.availableVoices[0])
         initialized = true
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-
-
         when (call.method) {
             "setLicense" -> {
                 setLicense(call)
