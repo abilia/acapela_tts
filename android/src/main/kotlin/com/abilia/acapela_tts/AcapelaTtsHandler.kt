@@ -57,7 +57,7 @@ class AcapelaTtsHandler(
     val speechRate: Float
         get() = mTts.speechRate.toFloat()
 
-    fun setSpeechRate(speechRate: Float) {
+    private fun setSpeechRate(speechRate: Float) {
         if (isVoiceLoaded) {
             mTts.setSpeechRate(speechRate)
         }
@@ -85,7 +85,7 @@ class AcapelaTtsHandler(
     }
 
     fun setVoice(call: MethodCall, result: MethodChannel.Result) {
-        val voice: String = call.argument("voice")
+        val voice: String? = call.argument("voice")
         val loadedVoice = setVoice(voice)
         result.success(loadedVoice != null)
     }
@@ -114,7 +114,7 @@ class AcapelaTtsHandler(
     }
 
     fun textToSpeech(call: MethodCall, result: MethodChannel.Result) {
-        val text: String = call.argument("text")
+        val text: String? = call.argument("text")
         if (text != null && isVoiceLoaded) {
             mTts.speak(text)
             mListener = object : OnTtsFinishedListener {
@@ -130,9 +130,10 @@ class AcapelaTtsHandler(
     }
 
     fun setSpeechRate(call: MethodCall, result: MethodChannel.Result) {
-        val speed: Double = call.argument("speed")
+        val speed: Double? = call.argument("speed")
         if (speed != null && isVoiceLoaded) {
             setSpeechRate(speed.toFloat())
+            result.success(true)
         } else if (speed == null) {
             result.error("ARGUMENT", "No argument 'speed' of type Int provided", null)
         } else {
