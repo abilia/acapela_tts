@@ -113,7 +113,7 @@ class AcapelaTtsHandler(
         return this.voice
     }
 
-    fun textToSpeech(call: MethodCall, result: MethodChannel.Result) {
+    fun speak(call: MethodCall, result: MethodChannel.Result) {
         val text: String? = call.argument("text")
         if (text != null && isVoiceLoaded) {
             mTts.speak(text)

@@ -9,8 +9,8 @@ class AcapelaTts {
     return await _channel.invokeMethod('setLicense', {'userId': userId, 'password': password, 'license': license});
   }
 
-  static Future<void> playTts(String text) async {
-    return await _channel.invokeMethod('playTts', {'text': text});
+  static Future<void> speak(String text) async {
+    return await _channel.invokeMethod('speak', {'text': text});
   }
 
   static Future<bool> setVoice(String voice) async {

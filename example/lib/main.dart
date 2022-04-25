@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
             ),
             const Text('Click for tts'),
             ElevatedButton(
-              onPressed: () => AcapelaTts.playTts('Text till tal exempel'),
+              onPressed: () => AcapelaTts.speak('Text till tal exempel'),
               child: const Text('Test TTS'),
             ),
             const SizedBox(height: 20),

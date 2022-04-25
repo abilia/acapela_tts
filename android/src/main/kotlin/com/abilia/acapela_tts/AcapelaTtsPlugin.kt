@@ -67,7 +67,7 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
                 initPlugin()
             }
             "getPlatformVersion" -> result.success("Android " + Build.VERSION.RELEASE)
-            "playTts" -> mAcapelaTts.textToSpeech(call, result)
+            "speak" -> mAcapelaTts.speak(call, result)
             "setVoice" -> mAcapelaTts.setVoice(call, result)
             "getAvailableVoices" -> result.success(mAcapelaTts.availableVoices)
             "setSpeechRate" -> mAcapelaTts.setSpeechRate(call, result)
