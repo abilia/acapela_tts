@@ -135,7 +135,7 @@ class AcapelaTtsHandler(
             setSpeechRate(speed.toFloat())
             result.success(true)
         } else if (speed == null) {
-            result.error("ARGUMENT", "No argument 'speed' of type Int provided", null)
+            result.error("ARGUMENT", "No argument 'speed' of type Double provided", null)
         } else {
             result.error("VOICE", "No voice is set", null)
         }

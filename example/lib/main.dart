@@ -19,10 +19,12 @@ class _MyAppState extends State<MyApp> {
   double? _speechRate = 100;
   List<String>? _voices;
   String? _selectedVoice;
+  final AcapelaTts _acapelaTts = AcapelaTts();
 
   @override
   void initState() {
     super.initState();
+
     setLicense();
     getSpeechRate();
     getVoices();
@@ -49,7 +51,7 @@ class _MyAppState extends State<MyApp> {
               }).toList(),
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  AcapelaTts.setVoice(newValue);
+                  _acapelaTts.setVoice(newValue);
                 }
                 setState(() {
                   _selectedVoice = newValue;
@@ -58,7 +60,7 @@ class _MyAppState extends State<MyApp> {
             ),
             const Text('Click for tts'),
             ElevatedButton(
-              onPressed: () => AcapelaTts.speak('Text till tal exempel'),
+              onPressed: () => _acapelaTts.speak('Text till tal exempel'),
               child: const Text('Test TTS'),
             ),
             const SizedBox(height: 20),
@@ -68,7 +70,7 @@ class _MyAppState extends State<MyApp> {
               max: 1000,
               onChanged: _speechRate != null
                   ? (b) {
-                      AcapelaTts.setSpeechRate(b);
+                _acapelaTts.setSpeechRate(b);
                       setState(() => _speechRate = b);
                     }
                   : null,
@@ -78,15 +80,15 @@ class _MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => AcapelaTts.stop(),
+                  onPressed: () => _acapelaTts.stop(),
                   child: const Text('Stop'),
                 ),
                 ElevatedButton(
-                  onPressed: () => AcapelaTts.pause(),
+                  onPressed: () => _acapelaTts.pause(),
                   child: const Text('Pause'),
                 ),
                 ElevatedButton(
-                  onPressed: () => AcapelaTts.resume(),
+                  onPressed: () => _acapelaTts.resume(),
                   child: const Text('Resume'),
                 ),
               ],
@@ -99,7 +101,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> setLicense() async {
     // TODO: insert license here
-    await AcapelaTts.setLicense(
+    await _acapelaTts.setLicense(
     0,
     0,
     "");
@@ -109,7 +111,7 @@ class _MyAppState extends State<MyApp> {
     double? volume;
 
     try {
-      volume = await AcapelaTts.speechRate;
+      volume = await _acapelaTts.speechRate;
     } on PlatformException {
       volume = null;
     }
@@ -124,7 +126,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> getVoices() async {
     List<Object?>? voices;
     try {
-      voices = await AcapelaTts.availableVoices;
+      voices = await _acapelaTts.availableVoices;
     } on PlatformException {
       voices = null;
     }
