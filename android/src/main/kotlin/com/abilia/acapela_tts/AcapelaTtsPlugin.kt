@@ -43,20 +43,14 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun initPlugin() {
-        Log.d(javaClass.simpleName, "init plugin")
+        Log.d(javaClass.simpleName, "initialize plugin")
         assert(mLicense != null)
 
-        val listener: OnTtsFinishedListener = object : OnTtsFinishedListener {
-            override fun onTextSpeakFinished() {
-                Log.d(TAG, "Text complete")
-            }
-        }
         mAcapelaTts = AcapelaTtsHandler(
             context,
             mLicense!!,
             context!!.filesDir.absolutePath + VOICES_PATH,
         )
-        mAcapelaTts.setVoice(mAcapelaTts.availableVoices[0])
         initialized = true
     }
 
@@ -65,6 +59,7 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
             "setLicense" -> {
                 setLicense(call)
                 initPlugin()
+                result.success(initialized)
             }
             "getPlatformVersion" -> result.success("Android " + Build.VERSION.RELEASE)
             "speak" -> mAcapelaTts.speak(call, result)

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:acapela_tts/acapela_tts.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    setLicense();
+    initialize();
     getSpeechRate();
     getVoices();
   }
@@ -70,7 +71,7 @@ class _MyAppState extends State<MyApp> {
               max: 1000,
               onChanged: _speechRate != null
                   ? (b) {
-                _acapelaTts.setSpeechRate(b);
+                      _acapelaTts.setSpeechRate(b);
                       setState(() => _speechRate = b);
                     }
                   : null,
@@ -99,27 +100,32 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Future<void> setLicense() async {
+  Future<void> initialize() async {
     // TODO: insert license here
     await _acapelaTts.setLicense(
-    0,
-    0,
-    "");
-}
+      0,
+      0,
+      '',
+    );
+  }
 
   Future<void> getSpeechRate() async {
-    double? volume;
+    double? speechRate;
 
     try {
-      volume = await _acapelaTts.speechRate;
+      speechRate = await _acapelaTts.speechRate;
     } on PlatformException {
-      volume = null;
+      speechRate = null;
+    }
+    if (speechRate != null) {
+      speechRate = max(0, speechRate);
+      speechRate = min(100, speechRate);
     }
 
     if (!mounted) return;
 
     setState(() {
-      _speechRate = volume;
+      _speechRate = speechRate;
     });
   }
 
@@ -127,6 +133,9 @@ class _MyAppState extends State<MyApp> {
     List<Object?>? voices;
     try {
       voices = await _acapelaTts.availableVoices;
+      if (voices.isNotEmpty) {
+        _acapelaTts.setVoice(voices.first.toString());
+      }
     } on PlatformException {
       voices = null;
     }
