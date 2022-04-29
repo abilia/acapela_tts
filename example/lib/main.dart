@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:acapela_tts/acapela_tts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -102,10 +104,11 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initialize() async {
     // TODO: insert license here
-    await _acapelaTts.setLicense(
-      0,
-      0,
-      '',
+    await _acapelaTts.initialize(
+      userId: 0,
+      password: 0,
+      license: '',
+      voicesPath: (await getApplicationSupportDirectory()).path,
     );
   }
 

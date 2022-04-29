@@ -36,7 +36,7 @@ class AcapelaTtsHandler(
         private set
     private lateinit var mTts: acattsandroid
     private val mVoicePaths: Array<String> = arrayOf(voicePath)
-    val availableVoices: List<String>
+    val downloadedVoices: List<String>
         get() {
             val voices: MutableList<String> = ArrayList()
             val availableVoices: Array<String> = mTts.getVoicesList(mVoicePaths)

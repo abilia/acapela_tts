@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.abilia.acapela_tts.AcapelaTtsHandler.AcapelaLicense
-import com.abilia.acapela_tts.AcapelaTtsHandler.OnTtsFinishedListener
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.MethodCall
@@ -24,7 +23,6 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
 
     companion object {
         private val TAG = AcapelaTtsPlugin::class.java.simpleName
-        private const val VOICES_PATH = "/voices"
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -42,29 +40,28 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun initPlugin() {
+    private fun initPlugin(voicesPath : String) {
         Log.d(javaClass.simpleName, "initialize plugin")
         assert(mLicense != null)
-
         mAcapelaTts = AcapelaTtsHandler(
             context,
             mLicense!!,
-            context!!.filesDir.absolutePath + VOICES_PATH,
+            voicesPath,
         )
         initialized = true
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "setLicense" -> {
+            "initialize" -> {
                 setLicense(call)
-                initPlugin()
+                initPlugin(call.argument("voicesPath")!!)
                 result.success(initialized)
             }
             "getPlatformVersion" -> result.success("Android " + Build.VERSION.RELEASE)
             "speak" -> mAcapelaTts.speak(call, result)
             "setVoice" -> mAcapelaTts.setVoice(call, result)
-            "getAvailableVoices" -> result.success(mAcapelaTts.availableVoices)
+            "getAvailableVoices" -> result.success(mAcapelaTts.downloadedVoices)
             "setSpeechRate" -> mAcapelaTts.setSpeechRate(call, result)
             "getSpeechRate" -> result.success(mAcapelaTts.speechRate)
             "stop" -> mAcapelaTts.stop()
