@@ -7,26 +7,27 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 class AcapelaTtsHandler(
-    context: Context?,
+    context: Context,
     license: AcapelaLicense,
     voicePath: String,
 ) : acattsandroid.iTTSEventsCallback {
     companion object {
         private val TAG = AcapelaTtsHandler::class.java.simpleName
+        private const val VOICE_SPEAKER = "speaker"
+        private const val VOICE_LOCALE = "locale"
 
         init {
             System.loadLibrary("acattsandroid")
         }
     }
 
-    /**
-     * Data class to keep track of all parts of an Acapela license
-     */
+    /** Data class to keep track of all parts of an Acapela license */
     class AcapelaLicense(val userId: Long, val password: Long, val license: String)
 
-    /**
-     * Interface to get notified about when the text speaker finish speaking.
-     */
+    /** Data class for storing data about an Acapela Voice */
+    class AcapelaVoiceInfo(val name: String, val locale: String)
+
+    /** Interface to get notified about when the text speaker finish speaking. */
     interface OnTtsFinishedListener {
         fun onTextSpeakFinished()
     }
@@ -34,26 +35,28 @@ class AcapelaTtsHandler(
     private var mListener: OnTtsFinishedListener? = null
     var voice: String? = null
         private set
-    private lateinit var mTts: acattsandroid
+    private var mTts: acattsandroid = acattsandroid(context, this, null)
     private val mVoicePaths: Array<String> = arrayOf(voicePath)
+
     val downloadedVoices: List<String>
         get() {
-            val voices: MutableList<String> = ArrayList()
-            val availableVoices: Array<String> = mTts.getVoicesList(mVoicePaths)
-            resetVoiceAfterGetVoiceList()
-            for (i in availableVoices.indices) {
-                val voiceStr = availableVoices[i]
-                if (voiceStr.isNotEmpty()) {
-                    val voice: Map<String, String> = mTts.getVoiceInfo(voiceStr)
-                    if (voice["speaker"] != null) {
-                        voices.add(
-                            voice["speaker"]!!
-                        )
+            val availableVoices =
+                mTts.getVoicesList(mVoicePaths)
+                    .filterNotNull()
+                    .mapNotNull { mTts.getVoiceInfo(it) }
+                    .mapNotNull {
+                        val voiceName = it[VOICE_SPEAKER]
+                        val voiceLocale = it[VOICE_LOCALE]
+                        if (!voiceName.isNullOrEmpty() && !voiceLocale.isNullOrEmpty()) {
+                            AcapelaVoiceInfo(voiceName, voiceLocale)
+                        } else null
                     }
-                }
-            }
-            return voices
+
+            resetVoiceAfterGetVoiceList()
+
+            return availableVoices.map { it.name }
         }
+
     val speechRate: Float
         get() = mTts.speechRate.toFloat()
 
@@ -62,9 +65,6 @@ class AcapelaTtsHandler(
             mTts.setSpeechRate(speechRate)
         }
     }
-
-    val isSpeaking: Boolean
-        get() = isVoiceLoaded && mTts.isSpeaking
 
     fun pause() {
         if (isVoiceLoaded) {
@@ -92,23 +92,20 @@ class AcapelaTtsHandler(
 
     /**
      * Attempts to set the desired voice but will fall back to other voice if not successful.
-     * Returns the name of the loaded voice
-     * or null if the load failed.
+     * Returns the name of the loaded voice or null if the load failed.
      */
-    fun setVoice(voice: String?): String? {
+    private fun setVoice(voice: String?): String? {
         Log.d(TAG, "Setting voice e '$voice'")
-        if (voice != null && this.voice != voice) {
-            val availableVoices: Array<String> = mTts.getVoicesList(mVoicePaths)
-            var loaded = voice.isNotEmpty() && loadVoice(
-                voice
-            )
-            var voiceToTry = 0
-            while (!loaded && voiceToTry < availableVoices.size) {
-                loaded = loadVoice(availableVoices[voiceToTry++])
-            }
-            if (!loaded) {
-                Log.d(TAG, "Failed to load any suitable voice")
-            }
+
+        if (voice.isNullOrEmpty()) return null
+        if (loadVoice(voice)) {
+            return voice
+        }
+        val loaded =
+            mTts
+            .getVoicesList(mVoicePaths).filterNotNull().firstOrNull { loadVoice(it) }
+        if (loaded != null) {
+            Log.d(TAG, "Failed to load any suitable voice")
         }
         return this.voice
     }
@@ -117,11 +114,12 @@ class AcapelaTtsHandler(
         val text: String? = call.argument("text")
         if (text != null && isVoiceLoaded) {
             mTts.speak(text)
-            mListener = object : OnTtsFinishedListener {
-                override fun onTextSpeakFinished() {
-                    result.success(true)
+            mListener =
+                object : OnTtsFinishedListener {
+                    override fun onTextSpeakFinished() {
+                        result.success(true)
+                    }
                 }
-            }
         } else if (text == null) {
             result.error("ARGUMENT", "No argument 'text' of type String provided", null)
         } else {
@@ -148,13 +146,13 @@ class AcapelaTtsHandler(
     }
 
     private fun loadVoice(voice: String?): Boolean {
-        val errorCode: Int = mTts.load(voice, "")
+        val errorCode = mTts.load(voice, "")
         if (errorCode == 0) {
             this.voice = voice
-            Log.d(TAG, "AcapelaTts: Successfully loaded voice '$voice'")
+            Log.d(TAG, "Successfully loaded voice '$voice'")
             return true
         }
-        Log.d(TAG, "AcapelaTts: Failed to load voice '$voice'. Reason $errorCode")
+        Log.d(TAG, "Failed to load voice '$voice'. Reason $errorCode")
         return false
     }
 
@@ -172,7 +170,6 @@ class AcapelaTtsHandler(
 
     init {
         try {
-            mTts = acattsandroid(context, this, null)
             mTts.setLicense(license.userId, license.password, license.license)
         } catch (e: UnsatisfiedLinkError) {
             Log.e(TAG, "Failed to initiate Acapela tts", e)
