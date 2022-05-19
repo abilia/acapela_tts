@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
               }).toList(),
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  _acapelaTts.setVoice(newValue);
+                  _acapelaTts.setVoice({'voice': newValue});
                 }
                 setState(() {
                   _selectedVoice = newValue;
@@ -137,7 +137,7 @@ class _MyAppState extends State<MyApp> {
     try {
       voices = await _acapelaTts.availableVoices;
       if (voices.isNotEmpty) {
-        _acapelaTts.setVoice(voices.first.toString());
+        _acapelaTts.setVoice({'voice': voices.first.toString()});
       }
     } on PlatformException {
       voices = null;
