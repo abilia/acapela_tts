@@ -95,9 +95,10 @@ class AcapelaTtsHandler(
      * Returns the name of the loaded voice
      * or null if the load failed.
      */
-    fun setVoice(voice: String?): String? {
+    private fun setVoice(voice: String?): String? {
         Log.d(TAG, "Setting voice e '$voice'")
         if (voice != null && this.voice != voice) {
+            val speechRate = mTts.speechRate
             val availableVoices: Array<String> = mTts.getVoicesList(mVoicePaths)
             var loaded = voice.isNotEmpty() && loadVoice(
                 voice
@@ -106,7 +107,9 @@ class AcapelaTtsHandler(
             while (!loaded && voiceToTry < availableVoices.size) {
                 loaded = loadVoice(availableVoices[voiceToTry++])
             }
-            if (!loaded) {
+            if(loaded){
+                mTts.setSpeechRate(speechRate.toFloat())
+            } else {
                 Log.d(TAG, "Failed to load any suitable voice")
             }
         }
