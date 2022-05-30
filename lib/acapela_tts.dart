@@ -5,17 +5,26 @@ import 'package:flutter/services.dart';
 class AcapelaTts {
   static const MethodChannel _channel = MethodChannel('acapela_tts');
 
-  Future<bool> setLicense(int userId, int password, String license) async {
-    return await _channel.invokeMethod('setLicense',
-        {'userId': userId, 'password': password, 'license': license});
+  Future<bool> initialize({
+    required int userId,
+    required int password,
+    required String license,
+    required String voicesPath,
+  }) async {
+    return await _channel.invokeMethod('initialize', {
+      'userId': userId,
+      'password': password,
+      'license': license,
+      'voicesPath': voicesPath
+    });
   }
 
   Future<void> speak(String text) async {
     return await _channel.invokeMethod('speak', {'text': text});
   }
 
-  Future<bool> setVoice(String voice) async {
-    return await _channel.invokeMethod('setVoice', {'voice': voice});
+  Future<bool> setVoice(Map<String, String> voice) async {
+    return await _channel.invokeMethod('setVoice', voice);
   }
 
   Future<bool> setSpeechRate(double speed) async {
