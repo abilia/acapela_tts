@@ -108,7 +108,12 @@ class AcapelaTtsHandler(
                 loaded = loadVoice(availableVoices[voiceToTry++])
             }
             if(loaded){
-                mTts.setSpeechRate(speechRate.toFloat())
+                if(speechRate > 0){
+                    mTts.setSpeechRate(speechRate.toFloat())
+                } else {
+                    mTts.setSpeechRate(100f)
+                }
+
             } else {
                 Log.d(TAG, "Failed to load any suitable voice")
             }
