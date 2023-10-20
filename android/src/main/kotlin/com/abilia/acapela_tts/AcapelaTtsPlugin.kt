@@ -67,6 +67,7 @@ class AcapelaTtsPlugin : FlutterPlugin, MethodCallHandler {
             "stop" -> mAcapelaTts.stop()
             "resume" -> mAcapelaTts.resume()
             "pause" -> mAcapelaTts.pause()
+            "isSpeaking" -> result.success(mAcapelaTts.isSpeaking)
             else -> result.notImplemented()
         }
     }
