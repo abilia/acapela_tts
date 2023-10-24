@@ -50,4 +50,8 @@ class AcapelaTts {
   Future<void> resume() async {
     return await _channel.invokeMethod('resume');
   }
+
+  Future<bool> get isSpeaking async {
+    return await _channel.invokeMethod('isSpeaking');
+  }
 }
