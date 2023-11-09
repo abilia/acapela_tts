@@ -1,8 +1,7 @@
-# acapela_tts
 
-A new flutter plugin project.
+# ~~acapela_tts~~ decaprecated, moved to seagull/packages/
 
-## Getting Started
+## ~~Getting Started~~
 
 Add the following line to the android proguard rules to avoid it removing the classes:
 
